@@ -455,10 +455,15 @@ body { background: radial-gradient(ellipse at 0 20%, #10395470, transparent 58%)
 .hero-inner { padding-bottom: 38px; }
 .ocean-art { position: absolute; inset: 0; width: 100%; height: 100%; min-height: 680px; overflow: visible; fill: none; stroke: url(#ocean-stroke); stroke-width: 1.35; pointer-events: none; mask-image: linear-gradient(to bottom, transparent 6%, #000 35%, #000 96%); }
 .ocean-swell { transform-origin: center; will-change: transform; }
-.ocean-swell-back { opacity: .27; animation: ocean-drift-back 48s ease-in-out infinite alternate; }
-.ocean-swell-front { opacity: .52; stroke-width: 1.5; animation: ocean-drift-front 36s ease-in-out infinite alternate; }
-@keyframes ocean-drift-front { from { transform: translate(-42px, 14px); } to { transform: translate(48px, -16px); } }
-@keyframes ocean-drift-back { from { transform: translate(35px, -12px); } to { transform: translate(-38px, 20px); } }
+.ocean-swell-back { opacity: .34; animation: ocean-drift-back 25s ease-in-out -9s infinite alternate; }
+.ocean-swell-front { opacity: .62; stroke-width: 1.7; animation: ocean-drift-front 16s ease-in-out -6s infinite alternate; }
+@keyframes ocean-drift-front { from { transform: translate(-110px, 20px); } to { transform: translate(120px, -22px); } }
+@keyframes ocean-drift-back { from { transform: translate(90px, -18px); } to { transform: translate(-90px, 24px); } }
+/* Sparse highlights keep the current visible even as a swell changes direction. */
+.ocean-current { stroke: #8ae4f2; stroke-width: 2.4; stroke-linecap: round; stroke-dasharray: 110 580; opacity: .72; animation: ocean-current 18s linear infinite; }
+.ocean-current:nth-last-child(2) { animation-delay: -6s; }
+.ocean-current:last-child { animation-delay: -12s; }
+@keyframes ocean-current { to { stroke-dashoffset: -690; } }
 .actions { gap: 16px; margin: 30px 0 32px; }
 .actions .resource-button { min-width: 158px; min-height: 66px; padding: 14px 25px; gap: 13px; border-radius: 999px; border: 1px solid #496479; background: #071723ed; color: #eef6ff; font-size: 20px; line-height: 1.2; box-shadow: 0 7px 24px #03101d28; transition: background .2s, border-color .2s, transform .2s; }
 .resource-button svg { width: 23px; height: 23px; flex: 0 0 auto; }
@@ -476,7 +481,7 @@ body { background: radial-gradient(ellipse at 0 20%, #10395470, transparent 58%)
   .hero-inner { padding-bottom: 30px; }
   .hero::after { background: radial-gradient(ellipse 80% 70% at 50% 37%, #071d33ed 30%, #071d3370 80%, transparent); }
   .ocean-art { width: 180%; left: -40%; min-height: 100%; }
-  .ocean-swell-front { opacity: .42; }
+  .ocean-swell-front { opacity: .52; }
   .actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; max-width: 410px; margin: 27px auto; }
   .actions .resource-button { min-width: 0; min-height: 58px; padding: 12px 9px; gap: 8px; font-size: 15px; }
   .resource-button svg { width: 19px; height: 19px; }
