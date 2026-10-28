@@ -1,29 +1,47 @@
-const stages = [
-  {kicker:'01 / READ THE MAP',title:'Action-Impact<br> Stream Map',description:'Estimate how local quantization errors propagate to the final action. The map identifies which layer–step–stream regions deserve stronger protection.',label:'THE QUESTION',key:'Where does error matter most to control?'},
-  {kicker:'02 / SET THE ROUTE',title:'Shared-Weight<br> Error Routing',description:'Use map-derived importance to calibrate shared channel scaling. Protect high-impact regions while allowing more error in lower-impact computations.',label:'THE CONSTRAINT',key:'Keep one quantized weight matrix per layer, shared across streams and steps.'},
-  {kicker:'03 / ADJUST TO CONDITIONS',title:'Stream-Specific<br> Activation Modulation',description:'Refine activation gains and clipping thresholds for each stream and denoising step as activation ranges and action impact change.',label:'OFFLINE CALIBRATION',key:'Like adjusting to changing seas, using a calibrated lookup table—not online replanning.'}
-];
-const explorer = document.querySelector('.voyage-explorer');
+const explorer = document.querySelector('.method-explorer');
 const stageButtons = [...document.querySelectorAll('.stage-button')];
-function showStage(index) {
-  const stage = stages[index];
-  explorer.dataset.stage = index;
-  stageButtons.forEach((button, i) => { button.classList.toggle('active',i===index); button.setAttribute('aria-pressed',String(i===index)); });
-  document.getElementById('stage-kicker').textContent = stage.kicker;
-  document.getElementById('stage-title').innerHTML = stage.title;
-  document.getElementById('stage-description').textContent = stage.description;
-  document.getElementById('stage-key-label').textContent = stage.label;
-  document.getElementById('stage-key-text').textContent = stage.key;
+const methodPanels = [...document.querySelectorAll('.method-panel')];
+const methodPrevious = document.getElementById('method-prev');
+const methodNext = document.getElementById('method-next');
+const nextLabels = ['Next: Route →', 'Next: Modulate →', 'See full framework ↓'];
+let activeMethodStage = 0;
+
+function showStage(index, moveToPanel = false) {
+  activeMethodStage = index;
+  explorer.dataset.stage = String(index);
+  stageButtons.forEach((button, i) => {
+    const active = i === index;
+    button.classList.toggle('active', active);
+    button.setAttribute('aria-selected', String(active));
+    button.tabIndex = active ? 0 : -1;
+    button.querySelector('.step-card-state').textContent = active ? 'Now viewing' : 'Explore step →';
+    methodPanels[i].hidden = !active;
+  });
+  methodPrevious.disabled = index === 0;
+  methodNext.textContent = nextLabels[index];
+  document.getElementById('method-count').textContent = `Step ${index + 1} of 3`;
+  document.querySelectorAll('.step-progress-dots i').forEach((dot, i) => dot.classList.toggle('active', i === index));
+  if (moveToPanel) {
+    methodPanels[index].focus({preventScroll: true});
+    methodPanels[index].scrollIntoView({block: 'start'});
+  }
 }
-stageButtons.forEach((button,i)=>{
-  button.addEventListener('click',()=>showStage(i));
-  button.addEventListener('keydown',event=>{
-    if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;
+stageButtons.forEach((button, i) => {
+  button.addEventListener('click', () => showStage(i));
+  button.addEventListener('keydown', event => {
+    if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
     event.preventDefault();
-    const next=event.key==='Home'?0:event.key==='End'?2:(i+(event.key==='ArrowRight'?1:2))%3;
-    stageButtons[next].focus();showStage(next);
+    const next = event.key === 'Home' ? 0 : event.key === 'End' ? 2 : (i + (event.key === 'ArrowRight' ? 1 : 2)) % 3;
+    stageButtons[next].focus();
+    showStage(next);
   });
 });
+methodPrevious.addEventListener('click', () => showStage(Math.max(0, activeMethodStage - 1), true));
+methodNext.addEventListener('click', () => {
+  if (activeMethodStage < 2) showStage(activeMethodStage + 1, true);
+  else document.getElementById('method-framework').scrollIntoView({block: 'start'});
+});
+
 const models = [
   {name:'Cosmos-Policy',benchmark:'LIBERO · mean success (%)',fp:[98.5,261.460,4.241],W4A4:[98.3,117.322,2.229,1.645],W4A8:[98.6,133.455,1.959,1.642]},
   {name:'FastWAMJoint',benchmark:'LIBERO · mean success (%)',fp:[98.9,360.450,12.116],W4A4:[98.4,193.916,1.859,3.370],W4A8:[98.1,260.977,1.381,3.363]},
