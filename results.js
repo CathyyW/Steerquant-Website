@@ -22,22 +22,23 @@
     get(id).innerHTML = rows.map(row => `<span class="${row.method === 'SteerQuant' ? 'legend-ours' : ''}">${methodLabel(row.method)}</span>`).join('');
   }
 
-  function bars({id, title, groups, rows, max, step, decimals, unit, average = false, single = false, reference = null}) {
-    const width = 1120, height = 430, left = 60, right = 16, top = 40, bottom = 375;
+  function bars({id, title, groups, rows, min = 0, max, step, decimals, unit, average = false, single = false, reference = null}) {
+    const width = 1120, height = single ? 430 : 530, left = 60, right = 16, top = 40, bottom = 375;
     const plotWidth = width - left - right;
     const stride = plotWidth / groups.length;
     const band = single ? 740 : stride * 0.9;
     const slot = band / rows.length;
     const barWidth = Math.min(single ? 70 : 52, slot * 0.74);
-    const y = value => bottom - value / max * (bottom - top);
-    const svg = [`<svg viewBox="0 0 ${width} ${height}" role="img" aria-labelledby="${id}-title" aria-describedby="${id}-desc" class="comparison-svg${single ? ' single-group' : ''}">
+    const y = value => bottom - (value - min) / (max - min) * (bottom - top);
+    const svg = [`<svg viewBox="0 0 ${width} ${height}" role="img" aria-labelledby="${id}-title" aria-describedby="${id}-desc" data-axis-min="${min}" data-axis-max="${max}" class="comparison-svg${single ? ' single-group' : ''}">
       <title id="${id}-title">${title}</title>
-      <desc id="${id}-desc">Grouped bars on a zero-based axis. Exact values are labelled above every bar and available in the data table below. ${currentPrecision} methods are compared with a full-precision reference.</desc>`];
-    if (average) svg.push(`<rect class="average-band" x="${left + stride * (groups.length - 1) + 3}" y="15" width="${stride - 6}" height="405" rx="10"/>`);
-    for (let tick = 0; tick <= max + 0.0001; tick += step) {
+      <desc id="${id}-desc">${min > 0 ? `Zoomed, truncated axis from ${min} to ${max} percent; bars start at ${min}, not zero.` : 'Grouped bars on a zero-based axis.'} Method names appear below every bar. Exact values are labelled above every bar and available in the data table below. ${currentPrecision} methods are compared with a full-precision reference.</desc>`];
+    if (average) svg.push(`<rect class="average-band" x="${left + stride * (groups.length - 1) + 3}" y="15" width="${stride - 6}" height="${height - 25}" rx="10"/>`);
+    for (let tick = min; tick <= max + 0.0001; tick += step) {
       const label = Number(tick.toFixed(2));
       svg.push(`<line class="chart-grid" x1="${left}" y1="${y(tick)}" x2="${width - right}" y2="${y(tick)}"/><text class="chart-tick" x="${left - 13}" y="${y(tick) + 5}" text-anchor="end">${label}</text>`);
     }
+    if (min > 0) svg.push(`<path class="chart-axis-break" d="M${left - 7} ${bottom + 7}l14 -8m-14 16l14 -8"/>`);
     if (reference !== null) svg.push(`<line class="chart-reference" x1="${left}" x2="${width - right}" y1="${y(reference)}" y2="${y(reference)}"/>`);
     groups.forEach((group, groupIndex) => {
       const center = left + stride * (groupIndex + 0.5);
@@ -50,10 +51,10 @@
           <title>${group} · ${name(row.method)}: ${label}${unit === '×' ? '×' : ' ' + unit}</title>
           <rect x="${cx - barWidth / 2}" y="${y(value)}" width="${barWidth}" height="${bottom - y(value)}" rx="4"/>
           <text class="bar-value" x="${cx}" y="${y(value) - 11}" text-anchor="middle">${label}</text>
-          ${single ? `<text class="chart-group" x="${cx}" y="407" text-anchor="middle">${row.method === 'Original' ? 'BF16' : row.method}</text>` : ''}
+          <text class="bar-method${single ? ' bar-method-horizontal' : ''}" x="${cx}" y="${single ? 407 : bottom + 21}" ${single ? '' : `transform="rotate(-55 ${cx} ${bottom + 21})"`} text-anchor="${single ? 'middle' : 'end'}">${row.method === 'Original' ? 'BF16' : row.method}</text>
         </g>`);
       });
-      if (!single) svg.push(`<text class="chart-group${average && groupIndex === groups.length - 1 ? ' average-label' : ''}" x="${center}" y="407" text-anchor="middle">${group}</text>`);
+      if (!single) svg.push(`<text class="chart-group${average && groupIndex === groups.length - 1 ? ' average-label' : ''}" x="${center}" y="509" text-anchor="middle">${group}</text>`);
     });
     svg.push('</svg>');
     get(id).innerHTML = svg.join('');
@@ -74,12 +75,12 @@
     const best = rows.filter(row => !['Original', 'SteerQuant'].includes(row.method)).reduce((a, b) => a.values[last] >= b.values[last] ? a : b);
     const bestNames = rows.filter(row => !['Original', 'SteerQuant'].includes(row.method) && row.values[last] === best.values[last]).map(row => row.method).join(' / ');
     legend('success-legend', rows);
-    get('success-axis-label').textContent = `${single ? 'RoboLab' : 'LIBERO'} · Success rate (%) ↑${single ? ' · Axis: 0–25%' : ''}`;
-    bars({id: 'success-chart', title: `${currentModel} · ${currentPrecision} · Success rate (%)`, groups, rows, max: single ? 25 : 100, step: 25 / (single ? 5 : 1), decimals, unit: '%', average: !single, single});
+    get('success-axis-label').textContent = `${single ? 'RoboLab' : 'LIBERO'} · Success rate (%) ↑ · ${single ? 'Axis: 0–25%' : 'Zoomed axis: 90–100% (truncated)'}`;
+    bars({id: 'success-chart', title: `${currentModel} · ${currentPrecision} · Success rate (%)`, groups, rows, min: single ? 0 : 90, max: single ? 25 : 100, step: single ? 5 : 2, decimals, unit: '%', average: !single, single});
     get('success-summary').innerHTML = `<div><span>SteerQuant ${single ? 'success rate' : 'average'}</span><strong>${ours.toFixed(decimals)}<small>%</small></strong></div><div><span>vs. strongest quantized baseline</span><strong>${signed(ours - best.values[last], decimals)}<small> pp</small></strong><em>${bestNames} · ${best.values[last].toFixed(decimals)}%</em></div><div><span>vs. full precision</span><strong>${signed(ours - fp, decimals)}<small> pp</small></strong><em>BF16 · ${fp.toFixed(decimals)}%</em></div>`;
     get('success-note').textContent = single
       ? 'RoboLab uses a 0–25% axis to show its lower success-rate range. Both quantized settings remain below the full-precision reference. pp = percentage points.'
-      : `Zero-based 0–100% axis. Average values are reported by the paper, not recomputed from rounded suite scores. pp = percentage points.${currentModel === 'FastWAMJoint' && currentPrecision === 'W4A4' ? ' QuaRot has the highest quantized average in this setting.' : ''}`;
+      : `LIBERO is zoomed to 90–100%: the axis is truncated and bars start at 90%. Average values are reported by the paper, not recomputed from rounded suite scores. pp = percentage points.${currentModel === 'FastWAMJoint' && currentPrecision === 'W4A4' ? ' QuaRot has the highest quantized average in this setting.' : ''}`;
     dataTable('success-data', `${currentModel}, ${currentPrecision}, success rates from Table 1`, groups, rows, decimals, '%');
   }
 

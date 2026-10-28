@@ -161,6 +161,10 @@ h3{font-family:var(--display);font-weight:600;line-height:1.4;letter-spacing:-.5
 .chart-reference{stroke:#b7cce1;stroke-opacity:.8;stroke-dasharray:6 5;stroke-width:1.2}
 .chart-tick{font-size:14px;fill:#9cb7cf}
 .chart-group{font-size:16px;fill:#dbe8f4;font-weight:500}
+.bar-method{font-size:13.5px;fill:#dbe8f4;font-weight:500}
+.bar-method-horizontal{font-size:16px}
+.bar-ours .bar-method{fill:var(--copper);font-weight:700}
+.chart-axis-break{stroke:#bed1e5;stroke-width:2;fill:none;stroke-linecap:round}
 .chart-bar rect{fill:var(--bar-color);transition:filter .15s}
 .chart-bar:hover rect{filter:brightness(1.14)}
 .bar-value{font-size:13.5px;font-weight:600;fill:var(--bar-color)}
