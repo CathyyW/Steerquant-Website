@@ -49,6 +49,7 @@ const models = [
 ];
 const precisionButtons=[...document.querySelectorAll('.precision-button')];
 function showPrecision(precision){
+  renderComparisonCharts(precision);
   precisionButtons.forEach(button=>{const active=button.dataset.precision===precision;button.classList.toggle('active',active);button.setAttribute('aria-pressed',String(active));});
   document.getElementById('benchmark-table').innerHTML = `<table><caption class="sr-only">BF16 compared with SteerQuant ${precision}; success rate, denoising latency, speedup, and peak GPU memory.</caption><thead><tr><th>Model / benchmark</th><th>Task success (%)<small>BF16 → ${precision}</small></th><th>Latency (ms)<small>BF16 → ${precision}</small></th><th>Speedup<small>vs. BF16</small></th><th>Peak memory (GB)<small>BF16 → ${precision}</small></th></tr></thead><tbody>${models.map(model=>{const d=model[precision];return `<tr><th>${model.name}<small>${model.benchmark}</small></th><td>${model.fp[0]} → <strong>${d[0]}</strong></td><td>${model.fp[1].toFixed(3)} → <strong>${d[1].toFixed(3)}</strong></td><td><strong>${d[2].toFixed(3)}×</strong></td><td>${model.fp[2].toFixed(3)} → <strong>${d[3].toFixed(3)}</strong></td></tr>`;}).join('')}</tbody></table>`;
 }
