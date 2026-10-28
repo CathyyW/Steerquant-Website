@@ -1,7 +1,7 @@
 const stages = [
-  {kicker:'01 / READ THE MAP',title:'Action-Impact<br>Stream Map',description:'Estimate how local quantization errors propagate to the final action. The map identifies which layer–step–stream regions deserve stronger protection.',label:'THE QUESTION',key:'Where does error matter most to control?'},
-  {kicker:'02 / SET THE ROUTE',title:'Shared-Weight<br>Error Routing',description:'Use map-derived importance to calibrate shared channel scaling. Protect high-impact regions while allowing more error in lower-impact computations.',label:'THE CONSTRAINT',key:'Keep one quantized weight matrix per layer, shared across streams and steps.'},
-  {kicker:'03 / ADJUST TO CONDITIONS',title:'Stream-Specific<br>Activation Modulation',description:'Refine activation gains and clipping thresholds for each stream and denoising step as activation ranges and action impact change.',label:'OFFLINE CALIBRATION',key:'Like adjusting to changing seas, using a calibrated lookup table—not online replanning.'}
+  {kicker:'01 / READ THE MAP',title:'Action-Impact<br> Stream Map',description:'Estimate how local quantization errors propagate to the final action. The map identifies which layer–step–stream regions deserve stronger protection.',label:'THE QUESTION',key:'Where does error matter most to control?'},
+  {kicker:'02 / SET THE ROUTE',title:'Shared-Weight<br> Error Routing',description:'Use map-derived importance to calibrate shared channel scaling. Protect high-impact regions while allowing more error in lower-impact computations.',label:'THE CONSTRAINT',key:'Keep one quantized weight matrix per layer, shared across streams and steps.'},
+  {kicker:'03 / ADJUST TO CONDITIONS',title:'Stream-Specific<br> Activation Modulation',description:'Refine activation gains and clipping thresholds for each stream and denoising step as activation ranges and action impact change.',label:'OFFLINE CALIBRATION',key:'Like adjusting to changing seas, using a calibrated lookup table—not online replanning.'}
 ];
 const explorer = document.querySelector('.voyage-explorer');
 const stageButtons = [...document.querySelectorAll('.stage-button')];
