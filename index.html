@@ -50,7 +50,7 @@
 </div><a class="hero-down" href="#voyage">Follow the idea <span>↓</span></a></div></section>
 <div class="wrap"><section class="opening" id="voyage"><div class="opening-copy"><span class="section-label">THE CENTRAL IDEA</span><h2>Let action impact<br/>set the course.</h2><p>In a world–action model, numerical error alone does not tell us how much control will change. SteerQuant directs quantization error toward computations with less influence on final actions.</p></div><div class="promise"><div><span class="promise-number">01</span><p>One shared quantized weight matrix per layer</p></div><div><span class="promise-number">02</span><p>Fixed bit-widths across streams</p></div><div><span class="promise-number">03</span><p>Calibration guided by downstream action impact</p></div></div></section>
 <div class="metrics"><div><strong>≤0.8<small> pp</small></strong><p>Mean LIBERO success gap</p><span>W4A8 &amp; W4A4 · two WAMs</span></div><div><strong>2.23<small>×</small></strong><p>Up to denoising speedup</p><span>Cosmos-Policy · W4A4 · RTX 4090</span></div><div><strong>1.35<small>×</small></strong><p>Real-robot inference speedup</p><span>FastWAMJoint · W4A8 · RTX 4090</span></div></div>
-<section class="section" id="insight"><div class="section-label">01 / WHY STEER?</div><div class="section-heading"><h2>The same error can<br/>send actions off course.</h2><p>The influential stream changes across layers and denoising steps. A fixed preference for video or action tokens misses that changing structure.</p></div><article class="stream-demo" id="stream-demo" aria-labelledby="stream-demo-title">
+<section class="section" id="insight"><div class="section-label">01 / WHY STEER?</div><div class="section-heading"><h2>The same error can<br/>send actions off course.</h2><p>The influential stream changes across layers and denoising steps. A fixed preference for video or action tokens misses that changing structure.</p></div><article class="stream-demo" id="stream-demo" data-auto-play aria-labelledby="stream-demo-title">
   <div class="stream-demo-heading">
     <div><span class="stream-kicker">WATCH THE DIFFERENCE</span><h3 id="stream-demo-title">Matched local error.<br>Different task outcomes.</h3></div>
     <p>Perturb the video stream or the action stream. In this example, the same local-error magnitude leads to different outcomes.<span class="stream-task-caption">Mug-and-plate manipulation · Example rollouts</span></p>
@@ -82,10 +82,10 @@
   </div>
   <div class="stream-player">
     <div class="stream-timeline"><label for="stream-seek" class="sr-only">Comparison time in seconds</label><input type="range" id="stream-seek" min="0" max="17.333333" step="0.033333" value="0" aria-valuetext="0.0 of 17.3 seconds"><output id="stream-time" for="stream-seek">0.0 / 17.3 s</output></div>
-    <p id="stream-status" role="status" aria-live="polite">Ready · both clips play at their original speed.</p>
+    <p id="stream-status" role="status" aria-live="polite">Autoplays in view · both clips repeat together.</p>
   </div>
   <div class="stream-takeaway"><strong>Local error alone does not predict task outcome.</strong><p>In these rollouts, disrupted video predictions coexist with successful control. The effect on final actions is what matters.</p></div>
-  <p class="stream-demo-note">Outcomes shown for this example. Clips retain their original timing; the shorter rollout holds its final frame while the other continues.</p>
+  <p class="stream-demo-note">Outcomes shown for this example. Videos autoplay silently in view at their original speed. The shorter rollout holds its final frame until both restart together; scrolling away pauses playback.</p>
   <noscript><p class="stream-demo-note">Use “Open clip” to watch each rollout. Synchronized playback requires JavaScript.</p></noscript>
 </article>
 
