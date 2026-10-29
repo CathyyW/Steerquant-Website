@@ -1,20 +1,22 @@
 (() => {
-  const root = document.getElementById('stream-demo');
-  if (!root) return;
+  const instances = [];
+  document.querySelectorAll('#stream-demo, [data-paired-demo]').forEach(root => {
 
   const clips = [...root.querySelectorAll('video[data-demo-video]')];
-  const playButton = root.querySelector('#stream-play');
-  const replayButton = root.querySelector('#stream-replay');
-  const seek = root.querySelector('#stream-seek');
-  const timeOutput = root.querySelector('#stream-time');
-  const status = root.querySelector('#stream-status');
+  const playButton = root.querySelector('#stream-play, [data-pair-play]');
+  const replayButton = root.querySelector('#stream-replay, [data-pair-replay]');
+  const seek = root.querySelector('#stream-seek, [data-pair-seek]');
+  const timeOutput = root.querySelector('#stream-time, [data-pair-time]');
+  const status = root.querySelector('#stream-status, [data-pair-status]');
   const viewButtons = [...root.querySelectorAll('[data-stream-view]')];
+  const allowedViews = new Set(viewButtons.map(button => button.dataset.streamView));
+  const isStreamDemo = root.id === 'stream-demo';
   if (clips.length !== 2 || !playButton || !replayButton || !seek || !timeOutput || !status) return;
 
   const END_EPSILON = 0.005;
   const SEEK_TOLERANCE = 1 / 30;
   const WAIT_LIMIT = 15000;
-  let view = 'scene';
+  let view = root.dataset.defaultView || 'scene';
   let position = 0;
   let playing = false;
   let wantsPlayback = false;
@@ -82,6 +84,16 @@
     announce(message);
   }
 
+  const instance = {
+    pauseIfActive() {
+      if (playing || loading || wantsPlayback) pause('Paused while another demo plays.');
+    }
+  };
+  instances.push(instance);
+  function pauseOtherInstances() {
+    instances.forEach(other => { if (other !== instance) other.pauseIfActive(); });
+  }
+
   // Every media wait has both an abort path and a deadline, including slow seeks.
   function waitFor(clip, predicate, signal) {
     return new Promise((resolve, reject) => {
@@ -136,12 +148,14 @@
       button.setAttribute('aria-pressed', String(active));
       button.classList.toggle('active', active);
     });
-    root.querySelectorAll('.stream-observed-label').forEach(label => {
-      label.textContent = view === 'scene' ? 'Observed scene' : 'Observed wrist';
-    });
-    root.querySelectorAll('.stream-predicted-label').forEach(label => {
-      label.textContent = view === 'scene' ? 'Predicted future' : 'Predicted wrist';
-    });
+    if (isStreamDemo) {
+      root.querySelectorAll('.stream-observed-label').forEach(label => {
+        label.textContent = view === 'scene' ? 'Observed scene' : 'Observed wrist';
+      });
+      root.querySelectorAll('.stream-predicted-label').forEach(label => {
+        label.textContent = view === 'scene' ? 'Predicted future' : 'Predicted wrist';
+      });
+    }
     clips.forEach(clip => {
       const link = root.querySelector(`[data-open-clip="${clip.dataset.demoVideo}"]`);
       if (link) link.href = clip.dataset[`${view}Src`];
@@ -245,10 +259,15 @@
   }
 
   clips.forEach(clip => {
+    clip.preload = 'metadata';
+    clip.autoplay = false;
     clip.muted = true;
     clip.defaultMuted = true;
     clip.playsInline = true;
     clip.controls = false;
+    const initialSource = clip.dataset[`${view}Src`];
+    if (initialSource && clip.getAttribute('src') !== initialSource) clip.src = initialSource;
+    if (clip.dataset[`${view}Poster`]) clip.poster = clip.dataset[`${view}Poster`];
     clip.addEventListener('loadedmetadata', () => { if (!loading) refresh(); });
     clip.addEventListener('waiting', () => {
       if (playing && !hasEnded(clip, currentPosition())) synchronize(currentPosition(), true);
@@ -260,11 +279,13 @@
 
   playButton.addEventListener('click', () => {
     if (wantsPlayback || playing) return pause();
+    pauseOtherInstances();
     scrubbing = false;
     wantsPlayback = true;
     synchronize(position >= totalDuration() - END_EPSILON ? 0 : position, true);
   });
   replayButton.addEventListener('click', () => {
+    pauseOtherInstances();
     scrubbing = false;
     wantsPlayback = true;
     synchronize(0, true);
@@ -282,7 +303,7 @@
   seek.addEventListener('blur', finishSeeking);
   viewButtons.forEach(button => button.addEventListener('click', () => {
     const nextView = button.dataset.streamView;
-    if (!['scene', 'wrist'].includes(nextView) || nextView === view) return;
+    if (!allowedViews.has(nextView) || nextView === view) return;
     const target = currentPosition();
     scrubbing = false;
     view = nextView;
@@ -297,4 +318,5 @@
   updateView();
   refresh();
   announce('Play both clips in sync. The shorter clip will hold its final frame.');
+  });
 })();
