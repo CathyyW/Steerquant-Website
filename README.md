@@ -3,7 +3,7 @@
 Project page for **SteerQuant: Steering Quantization Error with Action-Guided Scaling in World-Action Models**.
 
 - Paper: https://arxiv.org/abs/2609.39056
-- Website: https://cathyyw.github.io/steerquant-project/
+- Website: https://cathyyw.github.io/Steerquant-Website/
 
 ## Edit and preview
 
