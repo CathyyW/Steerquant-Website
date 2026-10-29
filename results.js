@@ -79,8 +79,8 @@
     bars({id: 'success-chart', title: `${currentModel} · ${currentPrecision} · Success rate (%)`, groups, rows, min: single ? 0 : 90, max: single ? 25 : 100, step: single ? 5 : 2, decimals, unit: '%', average: !single, single});
     get('success-summary').innerHTML = `<div><span>SteerQuant ${single ? 'success rate' : 'average'}</span><strong>${ours.toFixed(decimals)}<small>%</small></strong></div><div><span>vs. strongest quantized baseline</span><strong>${signed(ours - best.values[last], decimals)}<small> pp</small></strong><em>${bestNames} · ${best.values[last].toFixed(decimals)}%</em></div><div><span>vs. full precision</span><strong>${signed(ours - fp, decimals)}<small> pp</small></strong><em>BF16 · ${fp.toFixed(decimals)}%</em></div>`;
     get('success-note').textContent = single
-      ? 'RoboLab uses a 0–25% axis to show its lower success-rate range. Both quantized settings remain below the full-precision reference. pp = percentage points.'
-      : `LIBERO is zoomed to 90–100%: the axis is truncated and bars start at 90%. Average values are reported by the paper, not recomputed from rounded suite scores. pp = percentage points.${currentModel === 'FastWAMJoint' && currentPrecision === 'W4A4' ? ' QuaRot has the highest quantized average in this setting.' : ''}`;
+      ? 'Quantized results remain below full precision. pp = percentage points.'
+      : `Truncated axis: bars start at 90%. Averages are reported by the paper. pp = percentage points.${currentModel === 'FastWAMJoint' && currentPrecision === 'W4A4' ? ' QuaRot has the highest quantized average in this setting.' : ''}`;
     dataTable('success-data', `${currentModel}, ${currentPrecision}, success rates from Table 1`, groups, rows, decimals, '%');
   }
 
@@ -93,7 +93,7 @@
     get('efficiency-insight').innerHTML = currentMetric === 'memory'
       ? '<strong>Memory is part of the trade-off.</strong> SteerQuant reduces peak memory relative to BF16; some quantized baselines use slightly less.'
       : '<strong>SteerQuant is the fastest reported method at matched precision</strong> across all three models on the RTX 4090.';
-    get('efficiency-note').textContent = `${currentMetric === 'latency' ? 'Denoising latency only; real-robot inference is reported separately below.' : currentMetric === 'speedup' ? 'Speedup is relative to each model’s own full-precision run. The dashed line marks 1×.' : 'Peak allocated GPU memory includes weights, activations and temporary buffers. It is distinct from packed weight storage.'}${currentPrecision === 'W4A8' ? ' PTQ4DiT and Q-DiT are not reported in Table 2 because their official implementations lack low-bit inference kernels for these settings.' : ''}`;
+    get('efficiency-note').textContent = `${currentMetric === 'latency' ? 'Denoising latency only.' : currentMetric === 'speedup' ? 'Relative to each model’s BF16 run; dashed line = 1×.' : 'Peak GPU memory includes weights, activations, and temporary buffers.'}${currentPrecision === 'W4A8' ? ' PTQ4DiT / Q-DiT: W4A8 efficiency results not reported.' : ''}`;
     dataTable('efficiency-data', `${currentPrecision}, ${metric.title}, RTX 4090, Table 2`, benchmarkData.models, rows, 3, metric.unit);
   }
 

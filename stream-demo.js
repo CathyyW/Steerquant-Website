@@ -83,7 +83,7 @@
     return operation;
   }
 
-  function pause(message = 'Paused. Both clips keep the same timeline.') {
+  function pause(message = 'Paused.') {
     position = currentPosition();
     wantsPlayback = false;
     scrubbing = false;
@@ -104,7 +104,7 @@
     const available = pageActive && inView && !document.hidden && !manualOwner;
     if (!available) {
       if (playing || loading || wantsPlayback) pause(document.hidden
-        ? 'Paused while this page is hidden.' : 'Paused automatically while outside view.');
+        ? 'Paused.' : 'Paused.');
       return;
     }
     // User-paused seeks may still be loading; leave those operations intact.
@@ -118,7 +118,7 @@
     autoPlay,
     reconcileAutoPlayback,
     pauseIfActive() {
-      if (playing || loading || wantsPlayback) pause('Paused while another demo plays.');
+      if (playing || loading || wantsPlayback) pause('Paused.');
     }
   };
   instances.push(instance);
@@ -204,7 +204,7 @@
     position = bounded(target);
     loading = true;
     refresh();
-    announce('Loading both clips at the selected time…');
+    announce('Loading…');
     try {
       clips.forEach(clip => {
         clip.preload = 'auto';
@@ -244,9 +244,9 @@
       shorterEnded = clips.some(clip => hasEnded(clip, position)) && position < totalDuration() - END_EPSILON;
       refresh();
       announce(playing
-        ? (shorterEnded ? 'The shorter clip holds its final frame while the longer clip continues.'
-          : autoPlay ? 'Playing in sync · both clips loop together.' : 'Playing both clips in sync.')
-        : position >= totalDuration() - END_EPSILON ? 'Both clips ended. Replay to watch again.' : 'Paused. Both clips keep the same timeline.');
+        ? (shorterEnded ? 'Playing.'
+          : autoPlay ? 'Playing.' : 'Playing.')
+        : position >= totalDuration() - END_EPSILON ? 'Finished.' : 'Paused.');
       if (playing) frame = requestAnimationFrame(tick);
     } catch (error) {
       if (ticket !== operation || signal.aborted) return;
@@ -265,7 +265,7 @@
   function tick() {
     frame = 0;
     if (!playing) return;
-    if (document.hidden) return pause('Paused while this page is hidden.');
+    if (document.hidden) return pause('Paused.');
     position = bounded(clockClip().currentTime);
     const total = totalDuration();
     if (position >= total - END_EPSILON || clockClip().ended) {
@@ -278,7 +278,7 @@
       wantsPlayback = false;
       stopMedia();
       refresh();
-      announce('Both clips ended. Replay to watch again.');
+      announce('Finished.');
       releaseManualOwner();
       return;
     }
@@ -299,7 +299,7 @@
       }
     }
     const endedNow = clips.some(clip => hasEnded(clip, position));
-    if (endedNow && !shorterEnded) announce('The shorter clip holds its final frame while the longer clip continues.');
+    if (endedNow && !shorterEnded) announce('Playing.');
     shorterEnded = endedNow;
     refresh();
     frame = requestAnimationFrame(tick);
@@ -374,7 +374,7 @@
     synchronize(target, wantsPlayback, true);
   }));
   document.addEventListener('visibilitychange', () => {
-    if (document.hidden && (playing || loading || wantsPlayback)) pause('Paused while this page is hidden.');
+    if (document.hidden && (playing || loading || wantsPlayback)) pause('Paused.');
     else if (!document.hidden) reconcileAutoPlayback();
   });
   window.addEventListener('pagehide', () => { pageActive = false; pause('Paused.'); });
@@ -382,8 +382,8 @@
   if (!seek.getAttribute('aria-label') && !seek.labels?.length) seek.setAttribute('aria-label', 'Shared playback position');
   updateView();
   refresh();
-  announce(autoPlay ? 'Autoplays in view · both clips repeat together.'
-    : 'Play both clips in sync. The shorter clip will hold its final frame.');
+  announce(autoPlay ? 'Ready.'
+    : 'Ready.');
   if (autoPlay) {
     const visibleFrames = new Set();
     const observer = new IntersectionObserver(entries => {
