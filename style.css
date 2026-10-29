@@ -12,7 +12,7 @@ header{height:76px;padding:0 4.5%;display:flex;justify-content:space-between;ali
 .brand svg{width:27px;height:27px;stroke:var(--copper);stroke-width:1.8}
 .nav-paper{font-size:18px;font-weight:600}
 .nav-paper span{margin-left:12px}
-nav{display:flex;gap:30px;font-size:18px}
+#primary-navigation{display:flex;gap:clamp(14px,1.5vw,24px);font-size:18px;white-space:nowrap}
 nav a{position:relative}
 nav a.active{color:var(--sea)}
 nav a.active:after{content:'';position:absolute;bottom:-27px;height:2px;background:var(--sea);left:0;right:0}
@@ -805,4 +805,29 @@ body { background: radial-gradient(ellipse at 0 20%, #10395470, transparent 58%)
 @media(max-width:360px){
  .compact-chart-picker{align-items:stretch;flex-direction:column;gap:7px}
  .compact-chart-picker select{width:100%;max-width:none}
+}
+
+/* Full-section navigation and the closing research motto. */
+header > .brand, .nav-paper{flex-shrink:0;white-space:nowrap}
+.nav-toggle{display:none;align-items:center;justify-content:center;gap:8px;min-width:44px;min-height:44px;padding:8px 10px;border:1px solid #42637e;border-radius:6px;background:#0c2a45;color:var(--ink);font-size:16px}
+.nav-toggle svg{width:20px;height:20px}
+.nav-toggle:hover,.nav-toggle[aria-expanded='true']{border-color:var(--sea);color:var(--sea)}
+footer .footer-tagline{display:block;margin:0;font-size:18px;line-height:1.6;letter-spacing:0;color:var(--ink)}
+footer .footer-tagline strong{font-weight:700}
+footer .footer-tagline em{font-style:italic}
+@media(max-width:1150px){
+ header{gap:18px}
+ .nav-toggle{display:flex;margin-left:auto}
+ #primary-navigation{display:none;position:absolute;top:calc(100% + 8px);right:20px;left:20px;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;padding:12px;border:1px solid #42637e;border-radius:10px;background:#091f35;box-shadow:0 16px 40px #020d1966;white-space:normal}
+ header[data-menu-open='true'] #primary-navigation{display:grid}
+ #primary-navigation a{display:flex;align-items:center;min-height:48px;padding:10px 14px;border-radius:5px;font-size:17px}
+ #primary-navigation a:hover,#primary-navigation a.active{background:#12354f}
+ #primary-navigation a.active:after{display:none}
+}
+@media(max-width:650px){
+ header{gap:12px;padding-inline:16px}
+ .nav-toggle-label{display:none}
+ .nav-paper span{margin-left:4px}
+ #primary-navigation{left:12px;right:12px}
+ footer .footer-tagline{flex-basis:100%;order:3;font-size:17px}
 }

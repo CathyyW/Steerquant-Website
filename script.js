@@ -68,6 +68,40 @@ document.getElementById('copy').addEventListener('click',async()=>{
     status.textContent='Citation selected. Press Ctrl+C (or ⌘C) to copy.';
   }
 });
+const navigationHeader = document.querySelector('header');
+const navigationToggle = navigationHeader?.querySelector('.nav-toggle');
+const primaryNavigation = navigationHeader?.querySelector('#primary-navigation');
+if (navigationToggle && primaryNavigation) {
+  const setMenuOpen = open => {
+    navigationHeader.dataset.menuOpen = String(open);
+    navigationToggle.setAttribute('aria-expanded', String(open));
+  };
+  navigationToggle.addEventListener('click', () => {
+    setMenuOpen(navigationToggle.getAttribute('aria-expanded') !== 'true');
+  });
+  primaryNavigation.addEventListener('click', event => {
+    if (event.target.closest('a')) setMenuOpen(false);
+  });
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && navigationToggle.getAttribute('aria-expanded') === 'true') {
+      event.preventDefault();
+      setMenuOpen(false);
+      navigationToggle.focus();
+    }
+  });
+  document.addEventListener('click', event => {
+    if (navigationToggle.getAttribute('aria-expanded') === 'true' &&
+        !primaryNavigation.contains(event.target) && !navigationToggle.contains(event.target)) {
+      setMenuOpen(false);
+    }
+  });
+  const desktopNavigation = window.matchMedia('(min-width: 1151px)');
+  desktopNavigation.addEventListener('change', event => {
+    if (event.matches) setMenuOpen(false);
+  });
+  setMenuOpen(false);
+}
+
 const sectionLinks=[...document.querySelectorAll('nav a')];
 if('IntersectionObserver' in window){
   const observer=new IntersectionObserver(entries=>{
