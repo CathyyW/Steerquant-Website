@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 
-<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1" name="viewport"/><meta content="#071d33" name="theme-color"/><title>SteerQuant — Steer the error. Keep actions on course.</title><meta content="SteerQuant guides 4-bit quantization by final-action impact: map, route, modulate, and execute with Rudder." name="description"/><link href="https://cathyyw.github.io/steerquant-project/" rel="canonical"/><link href="style.css?v=central-idea-20261029" rel="stylesheet"/><link href="assets/compass.svg?v=helm-20261028" rel="icon" type="image/svg+xml"/></head>
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1" name="viewport"/><meta content="#071d33" name="theme-color"/><title>SteerQuant — Steer the error. Keep actions on course.</title><meta content="SteerQuant guides 4-bit quantization by final-action impact: map, route, modulate, and execute with Rudder." name="description"/><link href="https://cathyyw.github.io/steerquant-project/" rel="canonical"/><link href="style.css?v=consistent-results-20261029" rel="stylesheet"/><link href="assets/compass.svg?v=helm-20261028" rel="icon" type="image/svg+xml"/></head>
 <body><a class="skip" href="#main">Skip to content</a>
 <header><a class="brand" href="#top"><svg aria-hidden="true" fill="none" viewbox="0 0 40 40"><circle cx="20" cy="20" r="11"></circle><circle cx="20" cy="20" r="3"></circle><path d="M20 2v15m0 6v15M2 20h15m6 0h15M7.3 7.3l10.6 10.6m4.2 4.2 10.6 10.6M7.3 32.7l10.6-10.6m4.2-4.2L32.7 7.3"></path></svg><span>SteerQuant</span></a><nav aria-label="Main navigation"><a href="#insight">Why steer?</a><a href="#method">The method</a><a href="#evidence">Evidence</a><a href="#results">Results</a></nav><a class="nav-paper" href="https://arxiv.org/abs/2609.39056">Paper <span>↗</span></a></header>
 <main id="main"><section class="hero" id="top"><svg class="ocean-art" viewBox="0 0 1440 760" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
@@ -117,8 +117,7 @@
   </div>
   <div class="chart-legend" id="success-legend" aria-label="Methods shown"></div>
   <div class="chart-axis-caption"><span id="success-axis-label">Success rate (%) ↑</span><span>Higher is better</span></div>
-  <p class="chart-scroll-hint">Swipe to view the full chart →</p>
-  <div class="chart-scroll" id="success-chart" role="region" tabindex="0" aria-label="Task success bar chart; scroll horizontally for the full chart"></div>
+  <div class="chart-scroll" id="success-chart" role="region" tabindex="0" aria-label="Task success comparison by method"></div>
   <div class="comparison-summary" id="success-summary" aria-live="polite"></div>
   <p class="chart-note" id="success-note"></p>
   <details class="chart-data"><summary>View exact success rates <span>Table 1</span></summary><div class="tablewrap" id="success-data"></div><a class="chart-source" href="https://arxiv.org/html/2609.39056v1#S5.T1" target="_blank" rel="noopener">Source: paper Table 1 ↗</a></details>
@@ -132,8 +131,7 @@
   </div><div class="chart-precision" aria-label="Quantization precision for both charts" role="group"><button aria-pressed="true" class="precision-button active" data-precision="W4A4">W4A4</button><button aria-pressed="false" class="precision-button" data-precision="W4A8">W4A8</button></div></div>
   <div class="chart-legend" id="efficiency-legend" aria-label="Methods shown"></div>
   <div class="chart-axis-caption"><span id="efficiency-axis-label">Denoising latency (ms) ↓</span><span>NVIDIA RTX 4090</span></div>
-  <p class="chart-scroll-hint">Swipe to compare all models →</p>
-  <div class="chart-scroll" id="efficiency-chart" role="region" tabindex="0" aria-label="Inference efficiency bar chart; scroll horizontally for all models"></div>
+  <div class="chart-scroll" id="efficiency-chart" role="region" tabindex="0" aria-label="Inference efficiency comparison by method"></div>
   <p class="efficiency-insight" id="efficiency-insight" aria-live="polite"></p>
   <p class="chart-note" id="efficiency-note"></p>
   <details class="chart-data"><summary>View exact efficiency values <span>Table 2</span></summary><div class="tablewrap" id="efficiency-data"></div><a class="chart-source" href="https://arxiv.org/html/2609.39056v1#S5.T2" target="_blank" rel="noopener">Source: paper Table 2 ↗</a></details>
@@ -179,7 +177,7 @@
 <div class="stream-player"><div class="stream-timeline"><input type="range" data-pair-seek min="0" max="27.633333" value="0" step="0.01" aria-label="Shared stacking video playback position"/><output data-pair-time>0.0 / 27.6 s</output></div><p data-pair-status role="status" aria-live="polite">Ready.</p></div>
 
 </article>
-<div class="robot-summary-heading" id="robot-evaluation"><h3>Reported real-robot evaluation</h3><p>Paper Table 4 · Three tasks · 12 trials per task</p></div><div class="robot-results"><div><span>MEDIAN END-TO-END INFERENCE LATENCY</span><strong>462.79 <i>→</i> 341.97 <small>ms</small></strong><p>BF16 → SteerQuant W4A8</p><p>Policy request sent → predicted actions received.<br/>Excludes robot motion execution time.</p></div><div><span>AVERAGE TASK SCORE</span><strong>75.93 <i>→</i> 82.41 <small>%</small></strong><p>Equal-weight average over three tasks</p></div></div><p class="result-note">Table 4. Scores are task-specific, not binary success rates. Battery insertion decreases (83.33% → 75.00%); packing and cup stacking improve.</p></section>
+<div class="robot-summary-heading" id="robot-evaluation"><h3>Reported real-robot evaluation</h3><p>Paper Table 4 · Three tasks · 12 trials per task</p></div><div class="robot-results"><div><span>MEDIAN END-TO-END INFERENCE LATENCY</span><strong><span class="metric-reference">462.79</span> <i>→</i> <span class="metric-ours">341.97</span> <small>ms</small></strong><p>BF16 → SteerQuant W4A8</p><p>Policy request sent → predicted actions received.<br/>Excludes robot motion execution time.</p></div><div><span>AVERAGE TASK SCORE</span><strong><span class="metric-reference">75.93</span> <i>→</i> <span class="metric-ours">82.41</span> <small>%</small></strong><p>Equal-weight average over three tasks</p></div></div><p class="result-note">Table 4. Scores are task-specific, not binary success rates. Battery insertion decreases (83.33% → 75.00%); packing and cup stacking improve.</p></section>
 <section class="section citation" id="citation"><div class="section-label">CONTINUE THE VOYAGE</div><div class="section-heading"><h2>Build on SteerQuant.</h2><a class="button primary" href="https://arxiv.org/abs/2609.39056">Explore the full paper ↗</a></div><div class="citation-head"><h3>BibTeX</h3><button id="copy" type="button">Copy citation</button></div><pre><code id="bib">@misc{wang2026steerquant,
   title={SteerQuant: Steering Quantization Error with
          Action-Guided Scaling in World-Action Models},
@@ -191,4 +189,4 @@
   archivePrefix={arXiv},
   primaryClass={cs.RO},
   url={https://arxiv.org/abs/2609.39056}
-}</code></pre><p aria-live="polite" id="copy-status" role="status"></p></section></div></main><footer><a class="brand" href="#top"><svg aria-hidden="true" fill="none" viewbox="0 0 40 40"><circle cx="20" cy="20" r="11"></circle><circle cx="20" cy="20" r="3"></circle><path d="M20 2v15m0 6v15M2 20h15m6 0h15M7.3 7.3l10.6 10.6m4.2 4.2 10.6 10.6M7.3 32.7l10.6-10.6m4.2-4.2L32.7 7.3"></path></svg><span>SteerQuant</span></a><p>Map. Route. Modulate.</p><a href="https://arxiv.org/abs/2609.39056">Paper &amp; figure source ↗</a></footer><script src="results-data.js?v=results-20261028"></script><script src="results.js?v=concise-notes-20261029"></script><script src="script.js?v=latency-scope-20261029"></script><script src="stream-demo.js?v=concise-status-20261029"></script></body></html>
+}</code></pre><p aria-live="polite" id="copy-status" role="status"></p></section></div></main><footer><a class="brand" href="#top"><svg aria-hidden="true" fill="none" viewbox="0 0 40 40"><circle cx="20" cy="20" r="11"></circle><circle cx="20" cy="20" r="3"></circle><path d="M20 2v15m0 6v15M2 20h15m6 0h15M7.3 7.3l10.6 10.6m4.2 4.2 10.6 10.6M7.3 32.7l10.6-10.6m4.2-4.2L32.7 7.3"></path></svg><span>SteerQuant</span></a><p>Map. Route. Modulate.</p><a href="https://arxiv.org/abs/2609.39056">Paper &amp; figure source ↗</a></footer><script src="results-data.js?v=results-20261028"></script><script src="results.js?v=responsive-results-20261029"></script><script src="script.js?v=latency-scope-20261029"></script><script src="stream-demo.js?v=concise-status-20261029"></script></body></html>
