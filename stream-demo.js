@@ -1,5 +1,7 @@
 (() => {
   const instances = [];
+  let manualOwner = null;
+  const reconcileAutoPlayers = () => instances.forEach(instance => instance.reconcileAutoPlayback());
   document.querySelectorAll('#stream-demo, [data-paired-demo]').forEach(root => {
 
   const clips = [...root.querySelectorAll('video[data-demo-video]')];
@@ -11,6 +13,7 @@
   const viewButtons = [...root.querySelectorAll('[data-stream-view]')];
   const allowedViews = new Set(viewButtons.map(button => button.dataset.streamView));
   const isStreamDemo = root.id === 'stream-demo';
+  const autoPlay = root.hasAttribute('data-auto-play') && 'IntersectionObserver' in window;
   if (clips.length !== 2 || !playButton || !replayButton || !seek || !timeOutput || !status) return;
 
   const END_EPSILON = 0.005;
@@ -28,6 +31,11 @@
   let shorterEnded = false;
   let lastProgressTime = 0;
   let lastProgressPosition = 0;
+  let inView = false;
+  let manuallyPaused = false;
+  let heldAtEnd = false;
+  let autoBlocked = false;
+  let pageActive = true;
 
   const seconds = value => value.toFixed(1);
   const duration = clip => Number.isFinite(clip.duration) && clip.duration > 0
@@ -82,16 +90,42 @@
     cancelOperation();
     refresh();
     announce(message);
+    releaseManualOwner();
+  }
+
+  function releaseManualOwner() {
+    if (manualOwner !== instance) return;
+    manualOwner = null;
+    queueMicrotask(reconcileAutoPlayers);
+  }
+
+  function reconcileAutoPlayback() {
+    if (!autoPlay) return;
+    const available = pageActive && inView && !document.hidden && !manualOwner;
+    if (!available) {
+      if (playing || loading || wantsPlayback) pause(document.hidden
+        ? 'Paused while this page is hidden.' : 'Paused automatically while outside view.');
+      return;
+    }
+    // User-paused seeks may still be loading; leave those operations intact.
+    if (manuallyPaused || heldAtEnd || autoBlocked) return;
+    if (playing || loading || wantsPlayback) return;
+    wantsPlayback = true;
+    synchronize(position >= totalDuration() - END_EPSILON ? 0 : position, true);
   }
 
   const instance = {
+    autoPlay,
+    reconcileAutoPlayback,
     pauseIfActive() {
       if (playing || loading || wantsPlayback) pause('Paused while another demo plays.');
     }
   };
   instances.push(instance);
   function pauseOtherInstances() {
-    instances.forEach(other => { if (other !== instance) other.pauseIfActive(); });
+    instances.forEach(other => {
+      if (other !== instance && !(autoPlay && other.autoPlay)) other.pauseIfActive();
+    });
   }
 
   // Every media wait has both an abort path and a deadline, including slow seeks.
@@ -201,20 +235,26 @@
         playing = true;
         lastProgressTime = performance.now();
         lastProgressPosition = position;
-      } else if (!activeClips.length) wantsPlayback = false;
+      } else if (!activeClips.length) {
+        wantsPlayback = false;
+        releaseManualOwner();
+      }
       pending = null;
       loading = false;
       shorterEnded = clips.some(clip => hasEnded(clip, position)) && position < totalDuration() - END_EPSILON;
       refresh();
       announce(playing
-        ? (shorterEnded ? 'The shorter clip holds its final frame while the longer clip continues.' : 'Playing both clips in sync.')
+        ? (shorterEnded ? 'The shorter clip holds its final frame while the longer clip continues.'
+          : autoPlay ? 'Playing in sync · both clips loop together.' : 'Playing both clips in sync.')
         : position >= totalDuration() - END_EPSILON ? 'Both clips ended. Replay to watch again.' : 'Paused. Both clips keep the same timeline.');
       if (playing) frame = requestAnimationFrame(tick);
     } catch (error) {
       if (ticket !== operation || signal.aborted) return;
       wantsPlayback = false;
       scrubbing = false;
+      autoBlocked = true;
       cancelOperation();
+      releaseManualOwner();
       refresh();
       announce(error.name === 'NotAllowedError'
         ? 'Playback was blocked. Press Play both to try again, or open a clip directly.'
@@ -229,17 +269,24 @@
     position = bounded(clockClip().currentTime);
     const total = totalDuration();
     if (position >= total - END_EPSILON || clockClip().ended) {
+      // Loop the pair only after natural completion, never each video separately.
+      if (autoPlay && inView && !manuallyPaused && !autoBlocked && !manualOwner && pageActive) {
+        synchronize(0, true);
+        return;
+      }
       position = total;
       wantsPlayback = false;
       stopMedia();
       refresh();
       announce('Both clips ended. Replay to watch again.');
+      releaseManualOwner();
       return;
     }
     if (position > lastProgressPosition + 0.01) {
       lastProgressTime = performance.now();
       lastProgressPosition = position;
     } else if (performance.now() - lastProgressTime > 5000) {
+      autoBlocked = true;
       return pause('Playback stalled. Press Play both to try again, or open a clip directly.');
     }
     for (const clip of clips) {
@@ -261,6 +308,7 @@
   clips.forEach(clip => {
     clip.preload = 'metadata';
     clip.autoplay = false;
+    clip.loop = false;
     clip.muted = true;
     clip.defaultMuted = true;
     clip.playsInline = true;
@@ -273,24 +321,39 @@
       if (playing && !hasEnded(clip, currentPosition())) synchronize(currentPosition(), true);
     });
     clip.addEventListener('error', () => {
-      if (!loading) pause('A clip could not be loaded. Try Replay, or open it directly.');
+      if (!loading) {
+        autoBlocked = true;
+        pause('A clip could not be loaded. Try Replay, or open it directly.');
+      }
     });
   });
 
   playButton.addEventListener('click', () => {
-    if (wantsPlayback || playing) return pause();
+    if (wantsPlayback || playing) {
+      manuallyPaused = true;
+      return pause();
+    }
+    manuallyPaused = false;
+    heldAtEnd = false;
+    autoBlocked = false;
+    if (!autoPlay) manualOwner = instance;
     pauseOtherInstances();
     scrubbing = false;
     wantsPlayback = true;
     synchronize(position >= totalDuration() - END_EPSILON ? 0 : position, true);
   });
   replayButton.addEventListener('click', () => {
+    manuallyPaused = false;
+    heldAtEnd = false;
+    autoBlocked = false;
+    if (!autoPlay) manualOwner = instance;
     pauseOtherInstances();
     scrubbing = false;
     wantsPlayback = true;
     synchronize(0, true);
   });
   seek.addEventListener('input', () => {
+    heldAtEnd = Number(seek.value) >= totalDuration() - END_EPSILON;
     scrubbing = true;
     synchronize(Number(seek.value), false);
   });
@@ -312,11 +375,27 @@
   }));
   document.addEventListener('visibilitychange', () => {
     if (document.hidden && (playing || loading || wantsPlayback)) pause('Paused while this page is hidden.');
+    else if (!document.hidden) reconcileAutoPlayback();
   });
-  window.addEventListener('pagehide', () => pause('Paused.'));
+  window.addEventListener('pagehide', () => { pageActive = false; pause('Paused.'); });
+  window.addEventListener('pageshow', () => { pageActive = true; reconcileAutoPlayback(); });
   if (!seek.getAttribute('aria-label') && !seek.labels?.length) seek.setAttribute('aria-label', 'Shared playback position');
   updateView();
   refresh();
-  announce('Play both clips in sync. The shorter clip will hold its final frame.');
+  announce(autoPlay ? 'Autoplays in view · both clips repeat together.'
+    : 'Play both clips in sync. The shorter clip will hold its final frame.');
+  if (autoPlay) {
+    const visibleFrames = new Set();
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        // Separate enter/exit thresholds keep playback stable at viewport edges.
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.2) visibleFrames.add(entry.target);
+        else if (!entry.isIntersecting || entry.intersectionRatio <= 0.05) visibleFrames.delete(entry.target);
+      });
+      inView = visibleFrames.size > 0;
+      reconcileAutoPlayback();
+    }, {threshold: [0, 0.05, 0.2], rootMargin: '-76px 0px 0px 0px'});
+    clips.forEach(clip => observer.observe(clip.parentElement));
+  }
   });
 })();
